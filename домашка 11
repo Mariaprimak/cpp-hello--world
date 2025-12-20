@@ -1,0 +1,272 @@
+#include <iostream>
+#include <memory>
+#include <string>
+#include <cstring>
+#include <vector>
+
+// ==================== Задание 1: MagicSpell - Правило пяти ====================
+class MagicSpell {
+private:
+    char* data_;
+    int size_;
+    
+public:
+    // Конструктор по умолчанию
+    MagicSpell() : data_(nullptr), size_(0) {}
+    
+    // Конструктор с параметром
+    MagicSpell(const char* str) {
+        size_ = strlen(str);
+        data_ = new char[size_ + 1];
+        strcpy(data_, str);
+    }
+    
+    // Деструктор
+    ~MagicSpell() { 
+        delete[] data_;
+    }
+    
+    // Копирующий конструктор
+    MagicSpell(const MagicSpell& other) {
+        size_ = other.size_;
+        data_ = new char[size_ + 1];
+        strcpy(data_, other.data_);
+    }
+    
+    // Копирующий оператор присваивания
+    MagicSpell& operator=(const MagicSpell& other) {
+        if (this != &other) {
+            delete[] data_;
+            size_ = other.size_;
+            data_ = new char[size_ + 1];
+            strcpy(data_, other.data_);
+        }
+        return *this;
+    }
+    
+    // Move-конструктор
+    MagicSpell(MagicSpell&& other) noexcept {
+        data_ = other.data_;
+        size_ = other.size_;
+        
+        other.data_ = nullptr;
+        other.size_ = 0;
+    }
+    
+    // Move-оператор присваивания
+    MagicSpell& operator=(MagicSpell&& other) noexcept {
+        if (this != &other) {
+            delete[] data_;
+            
+            data_ = other.data_;
+            size_ = other.size_;
+            
+            other.data_ = nullptr;
+            other.size_ = 0;
+        }
+        return *this;
+    }
+    
+    const char* getText() const {
+        return data_ ? data_ : "(пусто)";
+    }
+};
+
+// ==================== Задание 2: Wizard - работа с unique_ptr ====================
+class Wizard {
+private:
+    std::string name;
+    std::unique_ptr<MagicSpell> currentSpell;
+    
+public:
+    Wizard(const std::string& wizardName) : name(wizardName) {}
+    
+    void learnSpell(std::unique_ptr<MagicSpell> spell) {
+        currentSpell = std::move(spell);
+    }
+    
+    std::unique_ptr<MagicSpell> castSpell() {
+        return std::move(currentSpell);
+    }
+    
+    bool hasSpell() const {
+        return currentSpell != nullptr;
+    }
+    
+    void showSpell() const {
+        std::cout << name << " заклинание: ";
+        if (currentSpell) {
+            std::cout << currentSpell->getText();
+        } else {
+            std::cout << "нет";
+        }
+        std::cout << std::endl;
+    }
+};
+
+// ==================== Задание 3: Team - работа с shared_ptr ====================
+class Arena {
+private:
+    std::string name;
+    
+public:
+    Arena(const std::string& arenaName) : name(arenaName) {}
+    
+    std::string getName() const {
+        return name;
+    }
+};
+
+class Team {
+private:
+    std::string teamName;
+    std::shared_ptr<Arena> homeArena;
+    
+public:
+    Team(const std::string& name, std::shared_ptr<Arena> arena)
+        : teamName(name), homeArena(arena) {}
+    
+    void showInfo() const {
+        std::cout << "Команда " << teamName << " на арене " << homeArena->getName() 
+                  << " (use_count: " << homeArena.use_count() << ")" << std::endl;
+    }
+};
+
+// ==================== Задание 4: Spectator - работа с weak_ptr ====================
+class Spectator {
+private:
+    std::string name;
+    std::weak_ptr<Arena> observedArena;
+    
+public:
+    Spectator(const std::string& spectatorName, std::shared_ptr<Arena> arena)
+        : name(spectatorName), observedArena(arena) {}
+    
+    void tryToWatch() const {
+        std::cout << name << " наблюдает: ";
+        if (auto arena = observedArena.lock()) {
+            std::cout << arena->getName();
+        } else {
+            std::cout << "арена уничтожена";
+        }
+        std::cout << std::endl;
+    }
+};
+
+// ==================== ТЕСТЫ ====================
+
+void testRuleOfFive() {
+    std::cout << "\n=== Тест 1: Правило пяти ===" << std::endl;
+    
+    // Создание
+    MagicSpell spell1("Огненный шар");
+    std::cout << "spell1: " << spell1.getText() << std::endl;
+    
+    // Копирование
+MagicSpell spell2 = spell1;
+    std::cout << "spell2 (копия): " << spell2.getText() << std::endl;
+    
+    // Копирующее присваивание
+    MagicSpell spell3;
+    spell3 = spell2;
+    std::cout << "spell3 (присваивание копированием): " << spell3.getText() << std::endl;
+    
+    // Перемещение
+    MagicSpell spell4 = std::move(spell1);
+    std::cout << "spell4 (перемещение): " << spell4.getText() << std::endl;
+    std::cout << "spell1 после перемещения: " << spell1.getText() << std::endl;
+    
+    // Перемещающее присваивание
+    MagicSpell spell5;
+    spell5 = std::move(spell2);
+    std::cout << "spell5 (присваивание перемещением): " << spell5.getText() << std::endl;
+    std::cout << "spell2 после перемещения: " << spell2.getText() << std::endl;
+    
+    std::cout << "Тест 1 ПРОЙДЕН" << std::endl;
+}
+
+void testUniquePtr() {
+    std::cout << "\n=== Тест 2: unique_ptr ===" << std::endl;
+    
+    Wizard gandalf("Гэндальф");
+    Wizard saruman("Саруман");
+    
+    // Гэндальф создает заклинание
+    auto spell = std::make_unique<MagicSpell>("Молния");
+    std::cout << "Создано заклинание: " << spell->getText() << std::endl;
+    
+    // Гэндальф изучает заклинание (передача владения)
+    gandalf.learnSpell(std::move(spell));
+    std::cout << "После learnSpell: ";
+    gandalf.showSpell();
+    
+    // Гэндальф отдает заклинание Саруману
+    auto transferredSpell = gandalf.castSpell();
+    std::cout << "После castSpell: ";
+    gandalf.showSpell();
+    
+    // Саруман принимает заклинание
+    saruman.learnSpell(std::move(transferredSpell));
+    std::cout << "Саруман теперь: ";
+    saruman.showSpell();
+    
+    std::cout << "Тест 2 ПРОЙДЕН" << std::endl;
+}
+
+void testSharedPtr() {
+    std::cout << "\n=== Тест 3: shared_ptr ===" << std::endl;
+    
+    // Создаем арену
+    auto arena = std::make_shared<Arena>("Хогвартс");
+    std::cout << "Создана арена: " << arena->getName() << std::endl;
+    std::cout << "Начальный use_count: " << arena.use_count() << std::endl;
+    
+    // Команды используют одну арену
+    Team team1("Гриффиндор", arena);
+    std::cout << "После team1: use_count = " << arena.use_count() << std::endl;
+    
+    Team team2("Слизерин", arena);
+    std::cout << "После team2: use_count = " << arena.use_count() << std::endl;
+    
+    team1.showInfo();
+    team2.showInfo();
+    
+    std::cout << "Тест 3 ПРОЙДЕН" << std::endl;
+}
+
+void testWeakPtr() {
+    std::cout << "\n=== Тест 4: weak_ptr ===" << std::endl;
+    
+    // Создаем арену
+    auto arena = std::make_shared<Arena>("Колизей");
+    
+    // Создаем зрителя с weak_ptr
+    Spectator spectator("Юлий", arena);
+    
+    // Арена существует
+    std::cout << "Арена существует: ";
+    spectator.tryToWatch();
+    
+    // Уничтожаем арену
+    arena.reset();
+    std::cout << "После arena.reset(): ";
+    spectator.tryToWatch();
+    
+    std::cout << "Тест 4 ПРОЙДЕН" << std::endl;
+}
+
+int main() {
+    std::cout << "=== Домашнее задание: Умные указатели и Move-семантика ===" << std::endl;
+    
+    // 3 теста как требуется в задании
+    testRuleOfFive();
+    testUniquePtr();
+    testSharedPtr();
+    
+    // Дополнительный тест для weak_ptr (опционально)
+    testWeakPtr();
+    
+    std::cout << "\n=== Все тесты успешно пройдены! ===" << std::endl;
+    
+    return 0;
+}
