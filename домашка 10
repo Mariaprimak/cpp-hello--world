@@ -1,0 +1,156 @@
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+// === ИЕРАРХИЯ SHAPE (из презентации) ===
+class Shape {
+protected:
+    std::string name;
+public:
+    Shape(const std::string& n) : name(n) {}
+    virtual double area() const = 0;
+    virtual void draw() const = 0;
+    virtual ~Shape() = default;
+    std::string getName() const { return name; }
+};
+
+class Circle : public Shape {
+private:
+    double radius;
+public:
+    Circle(double r) : Shape("Circle"), radius(r) {}
+    double area() const override final {
+        return 3.14159265 * radius * radius;
+    }
+    void draw() const override {
+        cout << "Рисую круг r=" << fixed << setprecision(1) << radius << endl;
+    }
+};
+
+class Rectangle : public Shape {
+private:
+    double width, height;
+protected:
+    void updateDimensions(double w, double h) { width = w; height = h; }
+public:
+    Rectangle(double w, double h) : Shape("Rectangle"), width(w), height(h) {}
+    double area() const override {
+        return width * height;
+    }
+    void draw() const override {
+        cout << "Рисую прямоугольник " << width << "x" << height << endl;
+    }
+};
+
+// === ИЕРАРХИЯ VEHICLE (домашнее задание) ===
+class Vehicle {
+protected:
+    std::string make, model;
+    int year;
+    double fuelEfficiency;
+public:
+    Vehicle(std::string m, std::string mod, int y, double fe) 
+        : make(m), model(mod), year(y), fuelEfficiency(fe) {}
+    virtual void startEngine() = 0;
+    virtual void stopEngine() = 0;
+    virtual std::string getDescription() const = 0;
+    virtual double calculateRange(double fuel) const = 0;
+    virtual ~Vehicle() = default;
+};
+
+class Car : public Vehicle {
+private:
+    int numberOfDoors;
+    double trunkCapacity;
+public:
+    Car(std::string m, std::string mod, int y, double fe, int doors, double trunk) 
+        : Vehicle(m, mod, y, fe), numberOfDoors(doors), trunkCapacity(trunk) {}
+    void startEngine() override {
+        cout << make << " " << model << " заводится тихо" << endl;
+    }
+    void stopEngine() override final {
+        cout << make << " " << model << " глохнет плавно" << endl;
+    }
+    std::string getDescription() const override {
+        return make + " " + model + " (" + to_string(year) + ")";
+    }
+    double calculateRange(double fuel) const override {
+        return fuel * fuelEfficiency;
+    }
+};
+
+class Truck : public Vehicle {
+private:
+    double cargoCapacity;
+    bool hasTrailer;
+public:
+    Truck(std::string m, std::string mod, int y, double fe, double cargo, bool trailer) 
+        : Vehicle(m, mod, y, fe), cargoCapacity(cargo), hasTrailer(trailer) {}
+    void startEngine() override {
+        cout << make << " " << model << " рычит мощно!" << endl;
+    }
+    void stopEngine() override {
+        cout << make << " " << model << " останавливается тяжело" << endl;
+    }
+    std::string getDescription() const override {
+        return make + " " + model + " (грузовик)";
+    }
+    double calculateRange(double fuel) const override {
+        return fuel * fuelEfficiency * (hasTrailer ? 0.8 : 1.0);
+    }
+};
+
+class Motorcycle : public Vehicle {
+private:
+    int engineSizeCC;
+    bool hasSideCar;
+public:
+    Motorcycle(std::string m, std::string mod, int y, double fe, int cc, bool sidecar) 
+        : Vehicle(m, mod, y, fe), engineSizeCC(cc), hasSideCar(sidecar) {}
+    void startEngine() override {
+        cout << make << " " << model << " взревел!" << endl;
+    }
+    void stopEngine() override {
+        cout << make << " " << model << " затих резко" << endl;
+    }
+    std::string getDescription() const override {
+        return make + " " + model + " (мотоцикл)";
+    }
+    double calculateRange(double fuel) const override {
+        return fuel * fuelEfficiency * 1.2;
+    }
+};
+
+int main() {
+    cout << "=== ДЕМОНСТРАЦИЯ SHAPE (без object slicing) ===" << endl;
+    std::vector<std::unique_ptr<Shape>> shapes;
+    shapes.push_back(std::make_unique<Circle>(5.0));
+    shapes.push_back(std::make_unique<Rectangle>(4.0, 6.0));
+    
+    double totalShapeArea = 0;
+    for (auto& shape : shapes) {
+shape->draw();
+        totalShapeArea += shape->area();
+    }
+    cout << "Общая площадь фигур: " << fixed << setprecision(1) 
+         << totalShapeArea << endl << endl;
+
+    cout << "=== ДОМАШНЕЕ ЗАДАНИЕ: VEHICLE ===" << endl;
+    std::vector<std::unique_ptr<Vehicle>> vehicles;
+    vehicles.push_back(std::make_unique<Car>("Toyota", "Camry", 2023, 12.0, 4, 500.0));
+    vehicles.push_back(std::make_unique<Truck>("Volvo", "FH16", 2022, 8.0, 20000, true));
+    vehicles.push_back(std::make_unique<Motorcycle>("Harley", "Fat Boy", 2024, 20.0, 1868, false));
+
+    for (auto& vehicle : vehicles) {
+        cout << "\n--- " << vehicle->getDescription() << " ---" << endl;
+        vehicle->startEngine();
+        cout << "Дальность на 50л: " << fixed << setprecision(0) 
+             << vehicle->calculateRange(50) << " км" << endl;
+        vehicle->stopEngine();
+    }
+
+    return 0;
+}
