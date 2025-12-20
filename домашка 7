@@ -1,0 +1,105 @@
+#include <iostream>
+using namespace std;                                     
+
+class Rectangle {
+private:                                                                                                         
+    double widht, height;
+public:
+    //Конструктор по умолчанию
+    Rectangle() : widht(1), height(1) {                   
+        cout << "Создан прямоугольник: " << widht << "x" << height << endl;
+    }
+
+    //Конструктор для квадрата
+    Rectangle(double side) : widht(side), height(side) {
+        cout << "Создан квадрат: " << widht << "x" << height << endl;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+    }
+
+    //Конструктор для прямоугольника                                                                                                                                                         
+    Rectangle(double w, double h) : widht(w), height(h) {                                                           
+        cout << "Создан прямоугольник: " << widht << "x" << height << endl;
+    }
+    
+    //Деструктор
+    ~Rectangle(){
+        cout<<"Удален "<<widht<<"x"<<height<< endl;
+    }
+    
+    // Метод масштабирования
+    void scale(double factor) {
+        if (factor > 0) {
+            widht *= factor;
+            height *= factor;
+            cout << "Масштабирован в " << factor << " раз: " << widht << "x" << height << endl;
+        } else {
+            cout << "Ошибка: коэффициент масштабирования должен быть > 0" << endl;
+        }
+    }
+
+    // Метод для красивого вывода
+     void print() {
+        if (is_square()) {
+            cout << "Квадрат " << widht << "x" << widht
+                 << " (площадь: " << area() 
+                 << ", периметр: " << perimetr() << ")" << endl;
+        }
+        else {
+            cout << "Прямоугольник " << widht << "x" << height 
+                 << " (площадь: " << area() 
+                 << ", периметр: " << perimetr() << ")" << endl;
+        }
+    }
+
+    
+    //Вычисления
+    double area() { return widht*height;}
+    double perimetr() { return 2*(widht+height);}
+    double is_square() { return widht==height;}
+
+    //Геттеры
+    double get_widht() {return widht;}
+    double get_height() {return height;}
+
+    //Сеттеры
+    void set_widht(double w){
+        if (w>0) widht=w;
+        else cout<<"Ошибка: ширина должна быть >0"<<endl;
+    }
+
+    void set_height(double h){
+        if (h>0) height=h;
+        else cout<<"Ошибка: высота должна быть >0"<<endl;
+    }
+};
+
+int main() {
+    // Тестирование всех конструкторов
+    cout << "=== Создание объектов ===" << endl;
+    Rectangle rect1;           // По умолчанию
+    Rectangle square(4.0);     // Квадрат
+    Rectangle rect2(5.0, 3.0); // Обычный прямоугольник
+
+    cout << "\n=== Тестирование метода print() ===" << endl;
+    rect1.print();
+    square.print();
+    rect2.print();
+
+    cout << "\n=== Тестирование масштабирования ===" << endl;
+    rect1.scale(2.0);  // Успешное масштабирование
+    square.scale(1.5); // Успешное масштабирование
+    rect2.scale(-1);   // Ошибочное масштабирование
+
+    cout << "\n=== Результаты после масштабирования ===" << endl;
+    rect1.print();
+    square.print();
+    rect2.print();
+
+    cout << "\n=== Дополнительное тестирование ===" << endl;
+    Rectangle rect3(2, 2);
+    rect3.print();
+
+    Rectangle rect4(5, 3);
+    rect4.print();
+
+    return 0;
+}
