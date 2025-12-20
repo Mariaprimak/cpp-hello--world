@@ -1,0 +1,243 @@
+#include <iostream>
+#include <cassert>
+#include <cmath>
+#include <ostream>
+
+using namespace std;
+
+class Vector3D {
+private:
+    double x, y, z;
+    mutable double cached_magnitude;
+    mutable bool cache_valid;
+    static int total_vectors;
+
+public:
+    Vector3D(double x = 0.0, double y = 0.0, double z = 0.0) 
+        : x(x), y(y), z(z), cached_magnitude(0.0), cache_valid(false) {
+        total_vectors++;
+    }
+    
+    ~Vector3D() {
+        total_vectors--;
+    }
+    
+    double getMagnitude() const {
+        if (!cache_valid) {
+            cached_magnitude = sqrt(x*x + y*y + z*z);
+            cache_valid = true;
+        }
+        return cached_magnitude;
+    }
+    
+    Vector3D normalize() const {
+        double mag = getMagnitude();
+        if (mag < 1e-10) {
+            return Vector3D(0, 0, 0);
+        }
+        return Vector3D(x/mag, y/mag, z/mag);
+    }
+    
+    static double dotProduct(const Vector3D& a, const Vector3D& b) {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+    
+    bool operator()(double component_value) const {
+        return fabs(x - component_value) < 1e-6 || 
+               fabs(y - component_value) < 1e-6 || 
+               fabs(z - component_value) < 1e-6;
+    }
+    
+    double getX() const { return x; }
+    double getY() const { return y; }
+    double getZ() const { return z; }
+    
+    void setX(double val) { x = val; cache_valid = false; }
+    void setY(double val) { y = val; cache_valid = false; }
+    void setZ(double val) { z = val; cache_valid = false; }
+    
+    static int getTotalVectors() { return total_vectors; }
+    
+    friend Vector3D operator+(const Vector3D& a, const Vector3D& b);
+    friend Vector3D operator-(const Vector3D& a, const Vector3D& b);
+    Vector3D operator*(double scalar) const;
+    bool operator==(const Vector3D& other) const;
+    bool operator!=(const Vector3D& other) const;
+    friend ostream& operator<<(ostream& os, const Vector3D& vec);
+    friend class Vector3DTest;
+};
+
+int Vector3D::total_vectors = 0;
+
+Vector3D operator+(const Vector3D& a, const Vector3D& b) {
+    return Vector3D(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+Vector3D operator-(const Vector3D& a, const Vector3D& b) {
+    return Vector3D(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+Vector3D Vector3D::operator*(double scalar) const {
+    return Vector3D(x * scalar, y * scalar, z * scalar);
+}
+
+bool Vector3D::operator==(const Vector3D& other) const {
+    const double epsilon = 1e-6;
+    return fabs(x - other.x) < epsilon &&
+           fabs(y - other.y) < epsilon &&
+           fabs(z - other.z) < epsilon;
+}
+
+bool Vector3D::operator!=(const Vector3D& other) const {
+    return !(*this == other);
+}
+
+ostream& operator<<(ostream& os, const Vector3D& vec) {
+    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    return os;
+}
+
+class Vector3DTest {
+private:
+    static bool validateComponent(double component) {
+        return !std::isnan(component) && !std::isinf(component);
+    }
+
+public:
+    static void testStaticCounter() {
+        int initial = Vector3D::getTotalVectors();
+        {
+            Vector3D v1;
+            Vector3D v2(1, 2, 3);
+            assert(Vector3D::getTotalVectors() == initial + 2);
+        }
+        assert(Vector3D::getTotalVectors() == initial);
+        cout << "testStaticCounter: OK" << endl;
+    }
+    
+    static void testCachingMechanism() {
+        Vector3D v(3, 4, 0);
+        double mag1 = v.getMagnitude();
+        v.setX(6);
+        assert(!v.cache_valid); // Проверяем, что кэш сброшен
+        double mag2 = v.getMagnitude();
+        assert(v.cache_valid); // Проверяем, что кэш установлен
+        assert(fabs(mag2 - sqrt(6*6 + 4*4)) < 1e-6);
+        cout << "testCachingMechanism: OK" << endl;
+    }
+    
+    static void testVectorAddition() {
+        Vector3D v1(1, 2, 3);
+        Vector3D v2(4, 5, 6);
+        Vector3D result = v1 + v2;
+        assert(fabs(result.getX() - 5) < 1e-6);
+        assert(fabs(result.getY() - 7) < 1e-6);
+        assert(fabs(result.getZ() - 9) < 1e-6);
+        cout << "testVectorAddition: OK" << endl;
+    }
+static void testVectorSubtraction() {
+        Vector3D v1(5, 5, 5);
+        Vector3D v2(1, 2, 3);
+        Vector3D result = v1 - v2;
+        assert(fabs(result.getX() - 4) < 1e-6);
+        assert(fabs(result.getY() - 3) < 1e-6);
+        assert(fabs(result.getZ() - 2) < 1e-6);
+        cout << "testVectorSubtraction: OK" << endl;
+    }
+    
+    static void testScalarMultiplication() {
+        Vector3D v(1, 2, 3);
+        Vector3D result = v * 2.5;
+        assert(fabs(result.getX() - 2.5) < 1e-6);
+        assert(fabs(result.getY() - 5.0) < 1e-6);
+        assert(fabs(result.getZ() - 7.5) < 1e-6);
+        cout << "testScalarMultiplication: OK" << endl;
+    }
+    
+    static void testEqualityOperator() {
+        Vector3D v1(1.0, 2.0, 3.0);
+        Vector3D v2(1.0000001, 2.0000001, 3.0000001);
+        Vector3D v3(1.1, 2.0, 3.0);
+        assert(v1 == v2);
+        assert(v1 != v3);
+        assert(!(v1 != v2));
+        cout << "testEqualityOperator: OK" << endl;
+    }
+    
+    static void testDotProduct() {
+        Vector3D v1(1, 2, 3);
+        Vector3D v2(4, 5, 6);
+        double dot = Vector3D::dotProduct(v1, v2);
+        assert(fabs(dot - (1*4 + 2*5 + 3*6)) < 1e-6);
+        cout << "testDotProduct: OK" << endl;
+    }
+    
+    static void testNormalization() {
+        Vector3D v(3, 4, 0);
+        Vector3D norm = v.normalize();
+        assert(fabs(norm.getMagnitude() - 1.0) < 1e-6);
+        
+        Vector3D zero(0, 0, 0);
+        Vector3D normZero = zero.normalize();
+        assert(fabs(normZero.getX()) < 1e-6);
+        assert(fabs(normZero.getY()) < 1e-6);
+        assert(fabs(normZero.getZ()) < 1e-6);
+        cout << "testNormalization: OK" << endl;
+    }
+    
+    static void testFunctionalObject() {
+        Vector3D v(1.0, 2.0, 3.0);
+        assert(v(1.0));
+        assert(v(2.0));
+        assert(v(3.0));
+        assert(!v(4.0));
+        cout << "testFunctionalObject: OK" << endl;
+    }
+    
+    static void runAllTests() {
+        testStaticCounter();
+        testCachingMechanism();
+        testVectorAddition();
+        testVectorSubtraction();
+        testScalarMultiplication();
+        testEqualityOperator();
+        testDotProduct();
+        testNormalization();
+        testFunctionalObject();
+        cout << "Все тесты успешно пройдены!" << endl;
+    }
+};
+
+int main() {
+    Vector3D v1(1, 2, 3);
+    Vector3D v2(4, 5, 6);
+    
+    cout << "v1 = " << v1 << endl;
+    cout << "v2 = " << v2 << endl;
+    
+    Vector3D sum = v1 + v2;
+    cout << "v1 + v2 = " << sum << endl;
+    
+    Vector3D diff = v1 - v2;
+    cout << "v1 - v2 = " << diff << endl;
+    
+    Vector3D scaled = v1 * 2.5;
+    cout << "v1 * 2.5 = " << scaled << endl;
+    
+    cout << "Длина v1: " << v1.getMagnitude() << endl;
+    
+    Vector3D normalized = v1.normalize();
+    cout << "Нормализованный v1: " << normalized << endl;
+    cout << "Длина нормализованного: " << normalized.getMagnitude() << endl;
+    
+    double dot = Vector3D::dotProduct(v1, v2);
+    cout << "Скалярное произведение v1 и v2: " << dot << endl;
+    
+    cout << "Проверка функтора: v1 содержит 2.0? " << (v1(2.0) ? "Да" : "Нет") << endl;
+    
+    cout << "Количество векторов: " << Vector3D::getTotalVectors() << endl;
+    
+    Vector3DTest::runAllTests();
+    
+    return 0;
+}
