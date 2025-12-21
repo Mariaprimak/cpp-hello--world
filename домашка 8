@@ -1,0 +1,67 @@
+#include <vector>
+#include <algorithm>
+
+struct Point {
+    double x, y;
+    
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+};
+
+class Rectangle {
+private:
+    double width, height;
+    Point bottomLeft;
+    
+public:
+    explicit Rectangle(double w = 0, double h = 0, double x = 0, double y = 0)
+        : width(w >= 0 ? w : 0), height(h >= 0 ? h : 0), bottomLeft(x, y) {}
+    
+    Rectangle(const Rectangle& other)
+        : width(other.width), height(other.height), bottomLeft(other.bottomLeft) {}
+    
+    Rectangle& operator=(const Rectangle& other) {
+        if (this != &other) {
+            width = other.width;
+            height = other.height;
+            bottomLeft = other.bottomLeft;
+        }
+        return *this;
+    }
+    
+    std::vector<Point> getAllCorners() const {
+        std::vector<Point> corners(4);
+        corners[0] = bottomLeft;
+        corners[1] = Point(bottomLeft.x + width, bottomLeft.y);
+        corners[2] = Point(bottomLeft.x + width, bottomLeft.y + height);
+        corners[3] = Point(bottomLeft.x, bottomLeft.y + height);
+        return corners;
+    }
+    
+    bool intersects(const Rectangle& other) const {
+        double left = std::max(bottomLeft.x, other.bottomLeft.x);
+        double right = std::min(bottomLeft.x + width, other.bottomLeft.x + other.width);
+        double bottom = std::max(bottomLeft.y, other.bottomLeft.y);
+        double top = std::min(bottomLeft.y + height, other.bottomLeft.y + other.height);
+        
+        return (left < right) && (bottom < top);
+    }
+    
+    bool contains(const Point& p) const {
+        return p.x >= bottomLeft.x && p.x <= bottomLeft.x + width &&
+               p.y >= bottomLeft.y && p.y <= bottomLeft.y + height;
+    }
+    
+    double getArea() const { return width * height; }
+    
+    Rectangle& moveTo(double x, double y) {
+        bottomLeft.x = x;
+        bottomLeft.y = y;
+        return *this;
+    }
+    
+    Rectangle& resize(double w, double h) {
+        width = w >= 0 ? w : 0;
+        height = h >= 0 ? h : 0;
+        return *this;
+    }
+};
