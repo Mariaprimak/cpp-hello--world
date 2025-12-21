@@ -1,0 +1,201 @@
+задача2:
+#include <iostream>
+#include <vector>
+
+int removeDuplicates(std::vector<int>& nums) {
+    if (nums.empty()) {
+        return 0;
+    }
+
+    int k = 0; // Позиция для уникального элемента
+
+    for (size_t i = 1; i < nums.size(); ++i) {
+        if (nums[i] != nums[k]) {
+            ++k;
+            nums[k] = nums[i];
+        }
+    }
+
+    return k + 1; // Количество уникальных элементов
+}
+
+int main() {
+    // Тест из условия: nums = [1, 1, 2]
+    std::vector<int> nums = {1, 1, 2};
+    
+    int result = removeDuplicates(nums);
+    
+    // Вывод результата как в условии
+    std::cout << result << std::endl; // Ожидаемый вывод: 2
+    std::cout << "[";
+    for (int i = 0; i < result; ++i) {
+        std::cout << nums[i];
+        if (i < result - 1) std::cout << ", ";
+    }
+    std::cout << "]" << std::endl;
+    
+    return 0;
+}
+
+задача 3:
+#include <iostream>
+#include <vector>
+
+std::vector<int> sortedSquares(std::vector<int>& nums) {
+    std::vector<int> result(nums.size());
+    int left = 0;
+    int right = nums.size() - 1;
+    int pos = nums.size() - 1; // Заполняем с конца
+
+    while (left <= right) {
+        int leftSquare = nums[left] * nums[left];
+        int rightSquare = nums[right] * nums[right];
+
+        if (leftSquare > rightSquare) {
+            result[pos] = leftSquare;
+            ++left;
+        } else {
+            result[pos] = rightSquare;
+            --right;
+        }
+        --pos;
+    }
+
+    return result;
+}
+
+int main() {
+    // Тест из условия: nums = [-4, -1, 0, 3, 10]
+    std::vector<int> nums = {-4, -1, 0, 3, 10};
+    
+    std::vector<int> result = sortedSquares(nums);
+    
+    // Вывод результата как в условии
+    std::cout << "[";
+    for (size_t i = 0; i < result.size(); ++i) {
+        std::cout << result[i];
+        if (i < result.size() - 1) std::cout << ", ";
+    }
+    std::cout << "]" << std::endl; // Ожидаемый вывод: [0, 1, 9, 16, 100]
+    
+    return 0;
+}
+задача 4:
+#include <iostream>
+#include <vector>
+
+void moveZeroes(std::vector<int>& nums) {
+    int k = 0; // Позиция для ненулевого элемента
+
+    // Перемещаем все ненулевые элементы в начало
+    for (size_t i = 0; i < nums.size(); ++i) {
+        if (nums[i] != 0) {
+            nums[k] = nums[i];
+            ++k;
+        }
+    }
+
+    // Заполняем оставшуюся часть нулями
+    for (size_t i = k; i < nums.size(); ++i) {
+        nums[i] = 0;
+    }
+}
+
+int main() {
+    // Тест из условия: nums = [0, 1, 0, 3, 12]
+    std::vector<int> nums = {0, 1, 0, 3, 12};
+    
+    moveZeroes(nums);
+    
+    // Вывод результата как в условии
+    std::cout << "[";
+    for (size_t i = 0; i < nums.size(); ++i) {
+        std::cout << nums[i];
+        if (i < nums.size() - 1) std::cout << ", ";
+    }
+    std::cout << "]" << std::endl; // Ожидаемый вывод: [1, 3, 12, 0, 0]
+    
+    return 0;
+}
+задача 5:
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+std::vector<int> findDisappearedNumbers(std::vector<int>& nums) {
+    // Используем массив как хэш-таблицу
+    for (size_t i = 0; i < nums.size(); ++i) {
+int index = std::abs(nums[i]) - 1; // Получаем индекс (0-based)
+        if (nums[index] > 0) {
+            nums[index] = -nums[index]; // Помечаем как встреченное
+        }
+    }
+
+    // Находим все положительные числа (индексы невстреченных чисел)
+    std::vector<int> result;
+    for (size_t i = 0; i < nums.size(); ++i) {
+        if (nums[i] > 0) {
+            result.push_back(i + 1); // Добавляем число (1-based)
+        }
+    }
+
+    return result;
+}
+
+int main() {
+    // Тест из условия: nums = [4, 3, 2, 7, 8, 2, 3, 1]
+    std::vector<int> nums = {4, 3, 2, 7, 8, 2, 3, 1};
+    
+    std::vector<int> result = findDisappearedNumbers(nums);
+    
+    // Вывод результата как в условии
+    std::cout << "[";
+    for (size_t i = 0; i < result.size(); ++i) {
+        std::cout << result[i];
+        if (i < result.size() - 1) std::cout << ", ";
+    }
+    std::cout << "]" << std::endl; // Ожидаемый вывод: [5, 6]
+    
+    return 0;
+}
+задача 6:
+#include <iostream>
+#include <vector>
+
+std::vector<int> productExceptSelf(std::vector<int>& nums) {
+    std::vector<int> result(nums.size(), 1);
+    
+    // Вычисляем произведения слева от каждого элемента
+    int leftProduct = 1;
+    for (size_t i = 0; i < nums.size(); ++i) {
+        result[i] = leftProduct;
+        leftProduct *= nums[i];
+    }
+    
+    // Вычисляем произведения справа и объединяем с левыми
+    int rightProduct = 1;
+    for (int i = nums.size() - 1; i >= 0; --i) {
+        result[i] *= rightProduct;
+        rightProduct *= nums[i];
+    }
+    
+    return result;
+}
+
+int main() {
+    // Тест из условия: nums = [1, 2, 3, 4]
+    std::vector<int> nums = {1, 2, 3, 4};
+    
+    std::vector<int> result = productExceptSelf(nums);
+    
+    // Вывод результата как в условии
+    std::cout << "[";
+    for (size_t i = 0; i < result.size(); ++i) {
+        std::cout << result[i];
+        if (i < result.size() - 1) std::cout << ", ";
+    }
+    std::cout << "]" << std::endl; // Ожидаемый вывод: [24, 12, 8, 6]
+    
+    return 0;
+}
+
