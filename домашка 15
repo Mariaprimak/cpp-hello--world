@@ -1,0 +1,44 @@
+#include <stdexcept>
+
+template<typename T, int Capacity>
+class Stack {
+private:
+    T data[Capacity];      // Массив для элементов
+    int topIndex;          // Индекс верхнего элемента
+
+public:
+    Stack() : topIndex(-1) {} // Конструктор
+    
+    void push(const T& value) { // Добавление
+        if (full()) {
+            throw std::runtime_error("Stack is full");
+        }
+        data[++topIndex] = value;
+    }
+    
+    T pop() { // Удаление и возврат
+        if (empty()) {
+            throw std::runtime_error("Stack is empty");
+        }
+        return data[topIndex--];
+    }
+    
+    const T& top() const { // Просмотр без удаления
+        if (empty()) {
+            throw std::runtime_error("Stack is empty");
+        }
+        return data[topIndex];
+    }
+    
+    bool empty() const { // Проверка пустоты
+        return topIndex == -1;
+    }
+    
+    bool full() const { // Проверка заполненности
+        return topIndex == Capacity - 1;
+    }
+    
+    int size() const { // Текущий размер
+        return topIndex + 1;
+    }
+};
