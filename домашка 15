@@ -1,3 +1,6 @@
+// ОТ УЧИТЕЛЯ:
+// Добавь, пожалуйста, main, где показано, как используется созданный тобой класс
+
 #include <stdexcept>
 
 template<typename T, int Capacity>
