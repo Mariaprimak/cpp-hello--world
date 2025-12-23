@@ -1,7 +1,4 @@
-// ОТ УЧИТЕЛЯ:
-// Добавь, пожалуйста, main, где показано, как используется созданный тобой класс
-
-
+#include <iostream>
 #include <vector>
 #include <algorithm>
 
@@ -69,3 +66,91 @@ public:
         return *this;
     }
 };
+
+int main() {
+    std::cout << "=== ДЕМОНСТРАЦИЯ РАБОТЫ КЛАССА RECTANGLE ===\n" << std::endl;
+    
+    // 1. Создание прямоугольников
+    std::cout << "1. СОЗДАНИЕ ПРЯМОУГОЛЬНИКОВ:" << std::endl;
+    Rectangle rect1(5.0, 3.0, 1.0, 1.0);
+    Rectangle rect2(4.0, 6.0, 3.0, 2.0);
+    Rectangle rect3(2.0, 2.0, 0.0, 0.0);
+    
+    std::cout << "   rect1 создан: ширина=5, высота=3, позиция=(1,1)" << std::endl;
+    std::cout << "   rect2 создан: ширина=4, высота=6, позиция=(3,2)" << std::endl;
+    std::cout << "   rect3 создан: ширина=2, высота=2, позиция=(0,0)" << std::endl;
+    
+    // 2. Вычисление площади
+    std::cout << "\n2. ПЛОЩАДИ ПРЯМОУГОЛЬНИКОВ:" << std::endl;
+    std::cout << "   Площадь rect1: " << rect1.getArea() << std::endl;
+    std::cout << "   Площадь rect2: " << rect2.getArea() << std::endl;
+    std::cout << "   Площадь rect3: " << rect3.getArea() << std::endl;
+    
+    // 3. Проверка пересечений
+    std::cout << "\n3. ПРОВЕРКА ПЕРЕСЕЧЕНИЙ:" << std::endl;
+    std::cout << "   rect1 пересекается с rect2: " 
+              << (rect1.intersects(rect2) ? "ДА" : "НЕТ") << std::endl;
+    std::cout << "   rect1 пересекается с rect3: " 
+              << (rect1.intersects(rect3) ? "ДА" : "НЕТ") << std::endl;
+    std::cout << "   rect2 пересекается с rect3: " 
+              << (rect2.intersects(rect3) ? "ДА" : "НЕТ") << std::endl;
+    
+    // 4. Проверка содержания точек
+    std::cout << "\n4. ПРОВЕРКА СОДЕРЖАНИЯ ТОЧЕК:" << std::endl;
+    Point p1(2.0, 2.0);
+    Point p2(10.0, 10.0);
+    Point p3(0.5, 0.5);
+    
+    std::cout << "   Точка (2,2) в rect1: " 
+              << (rect1.contains(p1) ? "ДА" : "НЕТ") << std::endl;
+    std::cout << "   Точка (10,10) в rect1: " 
+              << (rect1.contains(p2) ? "ДА" : "НЕТ") << std::endl;
+    std::cout << "   Точка (0.5,0.5) в rect3: " 
+              << (rect3.contains(p3) ? "ДА" : "НЕТ") << std::endl;
+    
+    // 5. Получение координат углов
+    std::cout << "\n5. КООРДИНАТЫ УГЛОВ ПРЯМОУГОЛЬНИКА:" << std::endl;
+    auto corners = rect3.
+getAllCorners();
+    std::cout << "   Углы rect3:" << std::endl;
+    for (size_t i = 0; i < corners.size(); ++i) {
+        std::cout << "      Угол " << i << ": (" 
+                  << corners[i].x << ", " << corners[i].y << ")" << std::endl;
+    }
+    
+    // 6. Копирование прямоугольников
+    std::cout << "\n6. КОПИРОВАНИЕ ПРЯМОУГОЛЬНИКОВ:" << std::endl;
+    Rectangle rect4 = rect1;  // конструктор копирования
+    std::cout << "   rect4 создан как копия rect1" << std::endl;
+    
+    Rectangle rect5;
+    rect5 = rect2;  // оператор присваивания
+    std::cout << "   rect5 получил значения rect2 через оператор присваивания" << std::endl;
+    
+    // 7. Перемещение прямоугольника
+    std::cout << "\n7. ПЕРЕМЕЩЕНИЕ ПРЯМОУГОЛЬНИКА:" << std::endl;
+    std::cout << "   Перемещаем rect3 из (0,0) в (10,10)" << std::endl;
+    rect3.moveTo(10.0, 10.0);
+    std::cout << "   Теперь rect1 пересекается с rect3: " 
+              << (rect1.intersects(rect3) ? "ДА" : "НЕТ") << std::endl;
+    
+    // 8. Изменение размера
+    std::cout << "\n8. ИЗМЕНЕНИЕ РАЗМЕРА ПРЯМОУГОЛЬНИКА:" << std::endl;
+    std::cout << "   Старая площадь rect1: " << rect1.getArea() << std::endl;
+    rect1.resize(10.0, 5.0);
+    std::cout << "   Меняем размер rect1 на 10x5" << std::endl;
+    std::cout << "   Новая площадь rect1: " << rect1.getArea() << std::endl;
+    std::cout << "   Теперь rect1 пересекается с rect2: " 
+              << (rect1.intersects(rect2) ? "ДА" : "НЕТ") << std::endl;
+    
+    // 9. Работа с некорректными данными
+    std::cout << "\n9. РАБОТА С НЕКОРРЕКТНЫМИ ДАННЫМИ:" << std::endl;
+    Rectangle rect6(-5.0, -3.0);  // отрицательные размеры
+    std::cout << "   Создан rect6 с отрицательными размерами (-5, -3)" << std::endl;
+    std::cout << "   Фактические размеры rect6: площадь = " << rect6.getArea() 
+              << " (ширина и высота установлены в 0)" << std::endl;
+    
+    std::cout << "\n=== ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА ===" << std::endl;
+    
+    return 0;
+}
