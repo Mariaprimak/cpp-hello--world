@@ -1,7 +1,6 @@
-// ОТ УЧИТЕЛЯ:
-// Добавь, пожалуйста, main, где показано, как используется созданный тобой класс
-
+#include <iostream>
 #include <stdexcept>
+#include <string>
 
 template<typename T, int Capacity>
 class Stack {
@@ -45,3 +44,121 @@ public:
         return topIndex + 1;
     }
 };
+
+int main() {
+    std::cout << "=== ДЕМОНСТРАЦИЯ РАБОТЫ КЛАССА STACK ===\n" << std::endl;
+    
+    // 1. Создание стека для целых чисел
+    std::cout << "1. СОЗДАНИЕ СТЕКА ДЛЯ ЦЕЛЫХ ЧИСЕЛ (емкость=5):" << std::endl;
+    Stack<int, 5> intStack;
+    
+    std::cout << "   Стек создан. Пуст ли? " << (intStack.empty() ? "ДА" : "НЕТ") << std::endl;
+    std::cout << "   Размер стека: " << intStack.size() << std::endl;
+    
+    // 2. Добавление элементов
+    std::cout << "\n2. ДОБАВЛЕНИЕ ЭЛЕМЕНТОВ:" << std::endl;
+    try {
+        std::cout << "   Добавляем 10" << std::endl;
+        intStack.push(10);
+        std::cout << "   Добавляем 20" << std::endl;
+        intStack.push(20);
+        std::cout << "   Добавляем 30" << std::endl;
+        intStack.push(30);
+        
+        std::cout << "   Верхний элемент: " << intStack.top() << std::endl;
+        std::cout << "   Размер стека: " << intStack.size() << std::endl;
+        std::cout << "   Пуст ли? " << (intStack.empty() ? "ДА" : "НЕТ") << std::endl;
+        std::cout << "   Полон ли? " << (intStack.full() ? "ДА" : "НЕТ") << std::endl;
+    } catch (const std::runtime_error& e) {
+        std::cout << "   Ошибка: " << e.what() << std::endl;
+    }
+    
+    // 3. Удаление элементов
+    std::cout << "\n3. УДАЛЕНИЕ ЭЛЕМЕНТОВ:" << std::endl;
+    try {
+        std::cout << "   Удаляем верхний элемент: " << intStack.pop() << std::endl;
+        std::cout << "   Новый верхний элемент: " << intStack.top() << std::endl;
+        std::cout << "   Удаляем еще один: " << intStack.pop() << std::endl;
+        std::cout << "   Последний элемент: " << intStack.top() << std::endl;
+        std::cout << "   Удаляем последний: " << intStack.pop() << std::endl;
+        std::cout << "   Размер стека: " << intStack.size() << std::endl;
+        std::cout << "   Пуст ли? " << (intStack.empty() ? "ДА" : "НЕТ") << std::endl;
+    } catch (const std::runtime_error& e) {
+        std::cout << "   Ошибка: " << e.what() << std::endl;
+    }
+    
+    // 4. Попытка удалить из пустого стека
+    std::cout << "\n4. ПОПЫТКА УДАЛИТЬ ИЗ ПУСТОГО СТЕКА:" << std::endl;
+    try {
+        intStack.pop();
+    } catch (const std::runtime_error& e) {
+        std::cout << "   Ошибка (ожидаемо): " << e.what() << std::endl;
+    }
+    
+    // 5. Переполнение стека
+    std::cout << "\n5. ПЕРЕПОЛНЕНИЕ СТЕКА:" << std::endl;
+    try {
+        for (int i = 1; i <= 6; i++) {
+            std::cout << "   Добавляем " << i << "0" << std::endl;
+            intStack.push(i * 10);
+        }
+    } catch (const std::runtime_error& e) {
+        std::cout << "   Ошибка (ожидаемо): " << e.what() << std::endl;
+    }
+    
+    // 6. Стек для строк
+    std::cout << "\n6. СТЕК ДЛЯ СТРОК (емкость=3):" << std::endl;
+    Stack<std::string, 3> stringStack;
+    
+    try {
+        stringStack.push("Привет");
+        stringStack.push("мир");
+        stringStack.push("C++");
+        
+        std::cout << "   Содержимое стека (LIFO - Last In First Out):" << std::endl;
+        while (!stringStack.empty()) {
+std::cout << "   " << stringStack.pop() << std::endl;
+        }
+    } catch (const std::runtime_error& e) {
+        std::cout << "   Ошибка: " << e.what() << std::endl;
+    }
+    
+    // 7. Стек для double
+    std::cout << "\n7. СТЕК ДЛЯ ДРОБНЫХ ЧИСЕЛ (емкость=4):" << std::endl;
+    Stack<double, 4> doubleStack;
+    
+    try {
+        doubleStack.push(3.14);
+        doubleStack.push(2.71);
+        doubleStack.push(1.41);
+        
+        std::cout << "   Верхний элемент: " << doubleStack.top() << std::endl;
+        doubleStack.pop();
+        std::cout << "   После удаления - верхний элемент: " << doubleStack.top() << std::endl;
+        
+        std::cout << "   Добавляем 0.577" << std::endl;
+        doubleStack.push(0.577);
+        std::cout << "   Верхний элемент теперь: " << doubleStack.top() << std::endl;
+    } catch (const std::runtime_error& e) {
+        std::cout << "   Ошибка: " << e.what() << std::endl;
+    }
+    
+    // 8. Демонстрация LIFO (последним пришел - первым ушел)
+    std::cout << "\n8. ДЕМОНСТРАЦИЯ ПРИНЦИПА LIFO:" << std::endl;
+    Stack<char, 6> charStack;
+    
+    std::cout << "   Добавляем буквы: A, B, C, D, E" << std::endl;
+    for (char c = 'A'; c <= 'E'; c++) {
+        charStack.push(c);
+    }
+    
+    std::cout << "   Извлекаем в обратном порядке: ";
+    while (!charStack.empty()) {
+        std::cout << charStack.pop() << " ";
+    }
+    std::cout << std::endl;
+    
+    std::cout << "\n=== ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА ===" << std::endl;
+    
+    return 0;
+}
